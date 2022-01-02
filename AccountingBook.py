@@ -54,96 +54,11 @@ class AccountingBook:
                                 self.init_time = t
                             if t > self.update_time:
                                 self.update_time = t
-                    elif title == '子分类':
-                        if sheet.row_values(row)[i] == '饭卡/停用':
-                            try:
-                                t = dt.strptime(sheet.row_values(row)[6], "%Y-%m-%d %H:%M:%S")
-                            except ValueError:
-                                t = dt.strptime(sheet.row_values(row)[6], "%Y-%m-%d %H:%M")
-                            data = {
-                                '交易类型':'转账','分类':'','子分类':'',
-                                '账户1':'饭卡','账户2':sheet.row_values(row)[3],
-                                '金额':sheet.row_values(row)[5],'日期':t,
-                                '成员':sheet.row_values(row)[7],
-                                '项目':sheet.row_values(row)[8],
-                                '商家':sheet.row_values(row)[9],
-                                '备注':sheet.row_values(row)[10]
-                                }
-                            break
-                        else:
-                            data[title] = sheet.row_values(row)[i]
                     else:
                         data[title] = sheet.row_values(row)[i]
                 deals.append(data)
             # END OF `for row in range(sheet.nrows):`
         # END OF `for sheet in workbook.sheets():`
-
-        workbook = rd.open_workbook('fanka.xls')
-        self.titles = workbook.sheets()[0].row_values(0)
-        for sheet in workbook.sheets():
-            # sheet.nrows; sheet.ncols; sheet.row_values(n); sheet.col_values(n); sheet.name
-            if not sheet.name == '收入':
-                sign = -1 if sheet.name in ['支出'] else 1
-                for row in range(1, sheet.nrows):
-                    data = {}
-                    for i, title in enumerate(self.titles):
-                        if title == '金额':
-                            data[title] = sign*sheet.row_values(row)[i]
-                        elif title == '日期':
-                            try:
-                                t = dt.strptime(sheet.row_values(row)[i], "%Y-%m-%d %H:%M:%S")
-                            except ValueError:
-                                t = dt.strptime(sheet.row_values(row)[i], "%Y-%m-%d %H:%M")
-                            finally:
-                                data[title] = t
-                                if t < self.init_time:
-                                    self.init_time = t
-                                if t > self.update_time:
-                                    self.update_time = t
-                        elif title == '分类':
-                            continue
-                        elif title == '子分类':
-                            # 吃饭 Liquid Solid 吃 用 ZJUWLAN 爱心捐赠 洗澡
-                            if title in ['用']:
-                                data['分类'] = '居家物业'
-                                data['子分类'] = '日常物品'
-                            elif title in ['洗澡']:
-                                data['分类'] = '居家物业'
-                                data['子分类'] = '水电煤气'
-                            elif title in ['爱心捐赠']:
-                                data['分类'] = '其他杂项'
-                                data['子分类'] = '其他支出'
-                            elif title in ['Liquid']:
-                                data['分类'] = '食品酒水'
-                                data['子分类'] = '饮料'
-                            elif title in ['Solid', '吃']:
-                                data['分类'] = '食品酒水'
-                                data['子分类'] = '零食'
-                            elif title in ['ZJUWLAN']:
-                                data['分类'] = '交流通讯'
-                                data['子分类'] = '上网费'
-                            else: # 吃饭
-                                data['分类'] = '食品酒水'
-                                data['子分类'] = '吃饭'
-                        else:
-                            data[title] = sheet.row_values(row)[i]
-                    deals.append(data)
-            else: # if not sheet.name...
-                for row in range(1, sheet.nrows):
-                    try:
-                        t = dt.strptime(sheet.row_values(row)[6], "%Y-%m-%d %H:%M:%S")
-                    except ValueError:
-                        t = dt.strptime(sheet.row_values(row)[6], "%Y-%m-%d %H:%M")
-                    data = {
-                        '交易类型':'转账','分类':'','子分类':'',
-                        '账户1':'LOST','账户2':'饭卡',
-                        '金额':sheet.row_values(row)[5],'日期':t,
-                        '成员':sheet.row_values(row)[7],
-                        '项目':sheet.row_values(row)[8],
-                        '商家':sheet.row_values(row)[9],
-                        '备注':sheet.row_values(row)[10]
-                        }
-                    deals.append(data)
 
         q = PQ()
         for deal in deals:
@@ -151,9 +66,6 @@ class AccountingBook:
         while not q.empty():
             deal = q.get()[1]
             self.deals.append(deal)
-
-    def _add_fanka_deals(self):
-        pass
 
     @property
     def tree(self):

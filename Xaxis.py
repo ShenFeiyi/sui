@@ -16,7 +16,7 @@ class Xaxis:
                 CALC_MODE_ON
                     kind (str): `engle` or `custom`.
                     interval (str): week month season year
-                    category (list *): [A, B], calculate A/B.
+                    category (list *): [A, B], calculate A/B. * optional in some cases.
             kwarg (dict):
                 start (datetime.datetime)
                 end (datetime.datetime)
@@ -79,7 +79,7 @@ class Xaxis:
         ## |    |   |   |   |   |
         ## -------------------------->
         ##      A   B   C   D   E
-        x = np.array(self.category)
+        x = np.array(self.category, dtype=object)
         return x
 
     def _style_II(self):

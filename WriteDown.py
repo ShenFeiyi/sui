@@ -7,7 +7,7 @@ from datetime import datetime as dt
 from AccountingBook import AccountingBook
 
 class Organize:
-    def __init__(self, accountingbook, *args): ############################## init ##############################
+    def __init__(self, accountingbook, *args):
         self.ab = accountingbook
         if len(args) > 0:
             self.s_time = max(self.ab.init_time, min(args))
@@ -29,14 +29,15 @@ class Organize:
         self.season()
         self.year()
 
-    def save(self, name='ready'): ############################## save ##############################
+    def save(self, name='ready'):
         self.wb.save(name.split('.')[0]+'.xls')
 
-    def hour(self): ############################## hour ##############################
+    ### HOUR ###
+    def hour(self):
         """
-class0 classI classII START 0 1 2 ... 23
-       xxxxxx xxxxxxx START money data
-              xxxxxxx START money data
+        class0 classI classII START 0 1 2 ... 23
+               xxxxxx xxxxxxx START money data
+                      xxxxxxx START money data
         """
         tree = self.ab.tree
         sheet = self.sheets['hour']
@@ -50,10 +51,10 @@ class0 classI classII START 0 1 2 ... 23
             hour_cols[h] = 4+h
 
         for item in title:
-            position, content = item
-            sheet.write(position[0], position[1], content)
+            (r, c), content = item
+            sheet.write(r, c, content)
 
-        newtree = {} # {zero:{I:{II:{hour:number}}}}
+        newtree = {} # {zero:{I:{II:{hour:number}}}}; init a new tree by hour
         for zero in ['收入', '支出']:
             if not zero in newtree:
                 newtree[zero] = {}
@@ -89,18 +90,19 @@ class0 classI classII START 0 1 2 ... 23
                     row += 1
 
         for item in fill:
-            position, content = item
-            sheet.write(position[0], position[1], content)
+            (r, c), content = item
+            sheet.write(r, c, content)
 
         sheet.write(row+1, 0, 'END')
 
         self.sheets['hour'] = sheet
 
-    def day(self): ############################## day ##############################
+    ### DAY ###
+    def day(self):
         """
-class0 classI classII START 1 2 3 ... 31
-       xxxxxx xxxxxxx START money data
-              xxxxxxx START money data
+        class0 classI classII START 1 2 3 ... 31
+               xxxxxx xxxxxxx START money data
+                      xxxxxxx START money data
         """
         tree = self.ab.tree
         sheet = self.sheets['day']
@@ -114,8 +116,8 @@ class0 classI classII START 1 2 3 ... 31
             day_cols[d] = 3+d
 
         for item in title:
-            position, content = item
-            sheet.write(position[0], position[1], content)
+            (r, c), content = item
+            sheet.write(r, c, content)
 
         newtree = {} # {zero:{I:{II:{hour:number}}}}
         for zero in ['收入', '支出']:
@@ -153,19 +155,20 @@ class0 classI classII START 1 2 3 ... 31
                     row += 1
 
         for item in fill:
-            position, content = item
-            sheet.write(position[0], position[1], content)
+            (r, c), content = item
+            sheet.write(r, c, content)
 
         sheet.write(row+1, 0, 'END')
 
         self.sheets['day'] = sheet
 
-    def week(self): ############################## week ##############################
+    ### WEEK ###
+    def week(self):
         """
-                            2018       2019
-class0 classI classII START  n    n+1   1    2   3
-       xxxxxx xxxxxxx START money data
-              xxxxxxx START money data
+                                    2018       2019
+        class0 classI classII START  n    n+1   1    2   3
+               xxxxxx xxxxxxx START money data
+                      xxxxxxx START money data
         """
         def _max_week_this_year(year):
             maxweek = 0
@@ -200,8 +203,8 @@ class0 classI classII START  n    n+1   1    2   3
                 title.append(((0,col),date[0]))
 
         for item in title:
-            position, content = item
-            sheet.write(position[0], position[1], content)
+            (r, c), content = item
+            sheet.write(r, c, content)
 
         newtree = {} # {zero:{I:{II:{year-week:number}}}}
         for zero in ['收入', '支出']:
@@ -238,19 +241,20 @@ class0 classI classII START  n    n+1   1    2   3
                     row += 1
 
         for item in fill:
-            position, content = item
-            sheet.write(position[0], position[1], content)
+            (r, c), content = item
+            sheet.write(r, c, content)
 
         sheet.write(row+1, 0, 'END')
 
         self.sheets['week'] = sheet
 
-    def month(self): ############################## month ##############################
+    ### MONTH ###
+    def month(self):
         """
-                            2018       2019
-class0 classI classII START  n    n+1   1    2   3
-       xxxxxx xxxxxxx START money data
-              xxxxxxx START money data
+                                    2018       2019
+        class0 classI classII START  n    n+1   1    2   3
+               xxxxxx xxxxxxx START money data
+                      xxxxxxx START money data
         """
         tree = self.ab.tree
         sheet = self.sheets['month']
@@ -320,12 +324,13 @@ class0 classI classII START  n    n+1   1    2   3
 
         self.sheets['month'] = sheet
 
-    def season(self): ############################## season ##############################
+    ### SEASON ###
+    def season(self):
         """
-                            2018      2019
-class0 classI classII START  3    4    1    2   3
-       xxxxxx xxxxxxx START money data
-              xxxxxxx START money data
+                                    2018      2019
+        class0 classI classII START  3    4    1    2   3
+               xxxxxx xxxxxxx START money data
+                      xxxxxxx START money data
         """
         def _month_2_season(month):
             return (month-1)//3 + 1
@@ -353,8 +358,8 @@ class0 classI classII START  3    4    1    2   3
                 title.append(((0,col),date[0]))
 
         for item in title:
-            position, content = item
-            sheet.write(position[0], position[1], content)
+            (r, c), content = item
+            sheet.write(r, c, content)
 
         newtree = {} # {zero:{I:{II:{year-season:number}}}}
         for zero in ['收入', '支出']:
@@ -391,18 +396,19 @@ class0 classI classII START  3    4    1    2   3
                     row += 1
 
         for item in fill:
-            position, content = item
-            sheet.write(position[0], position[1], content)
+            (r, c), content = item
+            sheet.write(r, c, content)
 
         sheet.write(row+1, 0, 'END')
 
         self.sheets['season'] = sheet
 
-    def year(self): ############################## year ##############################
+    ### YEAR ###
+    def year(self):
         """
-class0 classI classII START 2018 2019 2020 2021
-       xxxxxx xxxxxxx START money data
-              xxxxxxx START money data
+        class0 classI classII START 2018 2019 2020 2021
+               xxxxxx xxxxxxx START money data
+                      xxxxxxx START money data
         """
         tree = self.ab.tree
         sheet = self.sheets['year']
@@ -421,8 +427,8 @@ class0 classI classII START 2018 2019 2020 2021
             date += 1
 
         for item in title:
-            position, content = item
-            sheet.write(position[0], position[1], content)
+            (r, c), content = item
+            sheet.write(r, c, content)
 
         newtree = {} # {zero:{I:{II:{year:number}}}}
         for zero in ['收入', '支出']:
@@ -457,8 +463,8 @@ class0 classI classII START 2018 2019 2020 2021
                     row += 1
 
         for item in fill:
-            position, content = item
-            sheet.write(position[0], position[1], content)
+            (r, c), content = item
+            sheet.write(r, c, content)
 
         sheet.write(row+1, 0, 'END')
 

@@ -17,7 +17,7 @@ class Values:
                 CALC_MODE_ON
                     kind (str): `engle` or `custom`.
                     interval (str): week month season year
-                    category (list *): [A, B], calculate A/B.
+                    category (list *): [A, B], calculate A/B. * optional in some cases.
             kwarg (dict):
                 start (datetime.datetime)
                 end (datetime.datetime)
@@ -56,7 +56,7 @@ class Values:
 
         self.s_time = kwarg['start'] if 'start' in kwarg else AB.init_time
         self.e_time = kwarg['end'] if 'end' in kwarg else AB.update_time + delta(days=1)
-        self.filename = kwarg['name'] if 'name' in kwarg else 'v4.xls'
+        self.filename = kwarg['name'] if 'name' in kwarg else 'v5.xls'
 
         self.length = 0 # data length
         self.switch = 'value' # value or sum
@@ -183,14 +183,15 @@ class Values:
                         value[str(name)][switch] = val
         else:
             """支出 part only"""
-            value = {'invest':{},'non':{}} # {invest:{value:nparray, sum:nparray}, non-invest:{value, sum}}
+##            value = {'invest':{},'non':{}} # {invest:{value:nparray, sum:nparray}, non-invest:{value, sum}}
+            value = {} # {value:nparray, sum:nparray}
 
-            CateInvest = '定期投资'
-            val_invest = {}
-            for switch in ['value', 'sum']:
-                self.switch = switch
-                val = self._find_name(CateInvest)
-                val_invest[switch] = abs(val)
+##            CateInvest = '定期投资'
+##            val_invest = {}
+##            for switch in ['value', 'sum']:
+##                self.switch = switch
+##                val = self._find_name(CateInvest)
+##                val_invest[switch] = abs(val)
 
             CateA, CateB = self.category
             val_A, val_B = {}, {} # {value:nparray, sum:nparray}
@@ -216,13 +217,13 @@ class Values:
                     val_B[switch] = abs(val)
 
             for switch in ['value', 'sum']:
-                value['invest'][switch] = val_A[switch] / val_B[switch]
-                value['non'][switch] = val_A[switch] / (val_B[switch]-val_invest[switch])
+##                value['invest'][switch] = val_A[switch] / val_B[switch]
+##                value['non'][switch] = val_A[switch] / (val_B[switch]-val_invest[switch])
+                value[switch] = val_A[switch] / val_B[switch]
 
             # show data sheet
             # value = {
-            #     invest:{value:nparray, sum:nparray},
-            #     non-invest:{value:nparray, sum:nparray}
+            #     value:nparray, sum:nparray
             #     }
             data = rd.open_workbook(self.filename)
             sheets = data.sheets()
@@ -248,23 +249,26 @@ class Values:
                         continue
             title.reverse()
 
-            cols = np.zeros((len(title),4), dtype='float64')
+            cols = np.zeros((len(title),2), dtype='float64')
             for i in range(len(title)):
-                cols[len(title)-i-1][:] = value['invest']['value'][i], value['non']['value'][i], value['invest']['sum'][i], value['non']['sum'][i]
+##                cols[len(title)-i-1][:] = value['invest']['value'][i], value['non']['value'][i], value['invest']['sum'][i], value['non']['sum'][i]
+                cols[len(title)-i-1][:] = value['value'][i], value['sum'][i]
 
-            print('\t\t投资\t\t无投资\t\t\t 平均')
+##            print('\t\t投资\t\t无投资\t\t\t 平均')
+            print('\t\t  每月\t\t  平均')
             for i in range(len(title)):
                 print(title[i], end='\t\t')
                 if int(1e4*cols[i][0]) == int(1e4*cols[i][1]):
                     print('', end='\t\t')
                 else:
-                    print('{:5.2f}%'.format(1e2*cols[i][0]), end='\t\t')
-                print('{:5.2f}%'.format(1e2*cols[i][1]), end='\t\t')
-                if int(1e4*cols[i][2]) == int(1e4*cols[i][3]):
-                    print('', end='\t\t')
-                else:
-                    print('{:5.2f}%'.format(1e2*cols[i][2]), end='\t\t')
-                print('{:5.2f}%'.format(1e2*cols[i][3]))
+                    print('{:6.2f}%'.format(1e2*cols[i][0]), end='\t\t')
+##                print('{:5.2f}%'.format(1e2*cols[i][1]), end='\t\t')
+                print('{:6.2f}%'.format(1e2*cols[i][1]))
+##                if int(1e4*cols[i][2]) == int(1e4*cols[i][3]):
+##                    print('', end='\t\t')
+##                else:
+##                    print('{:5.2f}%'.format(1e2*cols[i][2]), end='\t\t')
+##                print('{:5.2f}%'.format(1e2*cols[i][3]))
             # END show data sheet
 
         return value
